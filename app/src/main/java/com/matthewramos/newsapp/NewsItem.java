@@ -1,6 +1,7 @@
 package com.matthewramos.newsapp;
 
 public class NewsItem {
+
     String title;
     String description;
     String publishedAt;
@@ -45,4 +46,5 @@ public class NewsItem {
     public void setUrl(String url) {
         this.url = url;
     }
+
 }
