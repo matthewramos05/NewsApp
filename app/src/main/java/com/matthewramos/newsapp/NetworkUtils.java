@@ -19,7 +19,7 @@ public class NetworkUtils {
     final static String PARAM_QUERY2 = "apiKey";
 
 
-    public static URL buildUrl(String newsAppSearchQuery) {
+    public static URL buildUrl() {
         Uri builtUri = Uri.parse(NEWSAPP_BASE_URL).buildUpon()
                 .appendQueryParameter(PARAM_QUERY, "the-next-web")
                 .appendQueryParameter(PARAM_QUERY1, "latest")

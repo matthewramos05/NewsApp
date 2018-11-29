@@ -1,9 +1,13 @@
 package com.matthewramos.newsapp;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProvider;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,6 +19,7 @@ import android.widget.TextView;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements NewsRecyclerViewAdapter.NewsClick {
 
@@ -22,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements NewsRecyclerViewA
     private RecyclerView mRecylcerView;
     private NewsRecyclerViewAdapter mNewsRecyclerViewAdapter;
     private ArrayList<NewsItem> newList;
+    private NewsItemViewModel mNewsItemViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,16 +36,18 @@ public class MainActivity extends AppCompatActivity implements NewsRecyclerViewA
         mUrlDisplayTextView = (TextView) findViewById(R.id.tv_url_display);
 
         mRecylcerView = (RecyclerView)findViewById(R.id.news_recyclerview);
-        mRecylcerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecylcerView.setHasFixedSize(true);
+        mNewsItemViewModel = ViewModelProviders.of(this).get(NewsItemViewModel.class);
+        mNewsItemViewModel.getAllNewsItems().observe(this, new Observer<List<NewsItem>>() {
+            @Override
+            public void onChanged(@Nullable List<NewsItem> newsItems) {
+                mNewsRecyclerViewAdapter = new NewsRecyclerViewAdapter(new ArrayList<NewsItem>(newsItems), MainActivity.this);
+                mRecylcerView.setAdapter(mNewsRecyclerViewAdapter);
+                mRecylcerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                mRecylcerView.setHasFixedSize(true);
+                newList = NewsItemRepository.SyncNewsTask.sNewItems;
+            }
+        });
 
-    }
-
-    private void newsAppSearchQuery() {
-        //String newsAppQuery = mSearchBoxEditText.getText().toString();
-        URL newsAppSearchUrl = NetworkUtils.buildUrl("the-next-web");
-        mUrlDisplayTextView.setText(newsAppSearchUrl.toString());
-        new NewsQueryTask().execute(newsAppSearchUrl);
     }
 
     @Override
@@ -50,31 +58,6 @@ public class MainActivity extends AppCompatActivity implements NewsRecyclerViewA
         startActivity(browseIntent);
     }
 
-    public class NewsQueryTask extends AsyncTask<URL, Void, String> {
-
-
-
-        @Override
-        protected String doInBackground(URL... params) {
-            URL searchUrl = params[0];
-            String newsAppSearchResults = null;
-            try {
-                newsAppSearchResults = NetworkUtils.getResponseFromHttpUrl(searchUrl);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return newsAppSearchResults;
-        }
-         @Override
-         protected void onPostExecute(String newsAppSearchResults) {
-            if (newsAppSearchResults != null && !newsAppSearchResults.equals("")) {
-                newList = JsonUtils.parseNews(newsAppSearchResults);
-                mNewsRecyclerViewAdapter = new NewsRecyclerViewAdapter(newList, MainActivity.this);
-                mRecylcerView.setAdapter(mNewsRecyclerViewAdapter);
-            }
-     }
-
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -86,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements NewsRecyclerViewA
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemThatWasClickedId = item.getItemId();
         if (itemThatWasClickedId == R.id.action_search) {
-            newsAppSearchQuery();
+            mNewsItemViewModel.syncNews();
             return true;
         }
         return super.onOptionsItemSelected(item);
