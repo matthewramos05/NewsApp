@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements NewsRecyclerViewA
                 newList = NewsItemRepository.SyncNewsTask.sNewItems;
             }
         });
-
+        NewsItemReminderUtils.scheduleChargingReminder(this);
     }
 
     @Override

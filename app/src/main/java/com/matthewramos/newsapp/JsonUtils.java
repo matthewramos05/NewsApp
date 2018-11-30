@@ -17,7 +17,7 @@ public class JsonUtils {
                 JSONObject item = articles.getJSONObject(i);
                 newsList.add(new NewsItem("Title "+item.getString("title"),
                         item.getString("description"), item.getString("publishedAt"),
-                        item.getString("url")));
+                        item.getString("url"), item.getString("urlToImage")));
             }
         }
         catch (JSONException e) {

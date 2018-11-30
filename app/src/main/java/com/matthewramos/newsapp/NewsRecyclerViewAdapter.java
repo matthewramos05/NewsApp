@@ -6,7 +6,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -38,8 +41,14 @@ public class NewsRecyclerViewAdapter extends RecyclerView.Adapter<NewsRecyclerVi
     @Override
     public void onBindViewHolder(@NonNull NewsItemViewHolder newsItemViewHolder, int position) {
         newsItemViewHolder.title.setText(mNewsList.get(position).getTitle());
-        newsItemViewHolder.description.setText(mNewsList.get(position).getDescription());
-        newsItemViewHolder.date.setText(mNewsList.get(position).getPublishedAt());
+        newsItemViewHolder.description.setText(mNewsList.get(position).getPublishedAt() + " . " +
+                mNewsList.get(position).getDescription());
+
+
+        String url = mNewsList.get(position).getImageUrl();
+        if (url != null) {
+            Picasso.get().load(url).into(newsItemViewHolder.mImageView);
+        }
     }
 
     @Override
@@ -50,15 +59,15 @@ public class NewsRecyclerViewAdapter extends RecyclerView.Adapter<NewsRecyclerVi
 
     public class NewsItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
-        TextView title;
-        TextView description;
-        TextView date;
+        private TextView title;
+        private TextView description;
+        private ImageView mImageView;
 
         public NewsItemViewHolder(View itemView) {
             super(itemView);
             title = (TextView) itemView.findViewById(R.id.title);
             description = (TextView) itemView.findViewById(R.id.description);
-            date = (TextView) itemView.findViewById(R.id.date);
+            mImageView = (ImageView) itemView.findViewById(R.id.iv_imageUrl);
             itemView.setOnClickListener(this);
         }
 
